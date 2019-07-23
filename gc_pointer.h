@@ -106,10 +106,13 @@ Pointer<T,size>::Pointer(T *t){
         atexit(shutdown);
     first = false;
 
-    auto pd = PtrDetails<T>{t, size};
-    pd.refcount = 1;
-    refContainer.push_back(pd);
-
+    auto p = findPtrInfo(t);
+    if (p != refContainer.end()) {
+        p->refcount += 1;
+    } else {
+        auto pd = PtrDetails<T>{t, size};
+        refContainer.push_back(pd);
+    }
     addr = t;
     isArray = (size != 0);
     arraySize = size;
@@ -136,11 +139,11 @@ Pointer<T, size>::~Pointer(){
     p = findPtrInfo(addr);
     // TODO: Finalize Pointer destructor
     // decrement ref count
-    p->refcount -= 1;
-    // Collect garbage when a pointer goes out of scope.
-    if (p->refcount == 0) {
-        collect();
+    if (p->refcount) {
+        p->refcount -= 1;
     }
+    // Collect garbage when a pointer goes out of scope.
+    collect();
     // For real use, you might want to collect unused memory less frequently,
     // such as after refContainer has reached a certain size, after a certain number of Pointers have gone out of scope,
     // or when memory is low.
@@ -194,7 +197,6 @@ T *Pointer<T, size>::operator=(T *t){
     auto tp = findPtrInfo(t);
     if (tp == refContainer.end()) {
         auto pd = PtrDetails<T>{t, size};
-        pd.refcount = 1;
         refContainer.push_back(pd);
     }
 

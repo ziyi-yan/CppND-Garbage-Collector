@@ -119,18 +119,7 @@ Pointer<T,size>::Pointer(T *t){
 }
 // Copy constructor.
 template< class T, int size>
-Pointer<T,size>::Pointer(const Pointer &ob){
-    typename std::list<PtrDetails<T> >::iterator p;
-    p = findPtrInfo(ob.addr);
-    
-    // TODO: Implement copy constructor
-    // increment ref count
-    p->refcount += 1;
-    // decide whether it is an array
-    addr = ob.addr;
-    isArray = ob.isArray;
-    arraySize = ob.arraySize;
-}
+Pointer<T,size>::Pointer(const Pointer &ob) : Pointer(ob.addr) {}
 
 // Destructor for Pointer.
 template <class T, int size>

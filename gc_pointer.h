@@ -32,6 +32,7 @@ private:
     static bool first; // true when first Pointer is created
     // Return an iterator to pointer details in refContainer.
     typename std::list<PtrDetails<T> >::iterator findPtrInfo(T *ptr);
+    void swap(Pointer<T, size> &lhs, Pointer<T, size> &rhs);
 public:
     // Define an iterator type for Pointer<T>.
     typedef Iter<T> GCiterator;
@@ -52,7 +53,7 @@ public:
     // Overload assignment of pointer to Pointer.
     T *operator=(T *t);
     // Overload assignment of Pointer to Pointer.
-    Pointer &operator=(Pointer &rv);
+    Pointer &operator=(Pointer rv);
     // Return a reference to the object pointed
     // to by this Pointer.
     T &operator*(){
@@ -170,52 +171,26 @@ bool Pointer<T, size>::collect(){
     return memfreed;
 }
 
+template <class T, int size>
+void Pointer<T, size>::swap(Pointer<T, size> &lhs, Pointer<T, size> &rhs) {
+    using std::swap;
+    swap(lhs.addr, rhs.addr);
+    swap(lhs.isArray, rhs.isArray);
+    swap(lhs.arraySize, rhs.arraySize);
+}
+
 // Overload assignment of pointer to Pointer.
 template <class T, int size>
 T *Pointer<T, size>::operator=(T *t){
-
-    // TODO: Implement operator==
-    // LAB: Smart Pointer Project Lab
-    typename std::list<PtrDetails<T> >::iterator p;
-    p = findPtrInfo(addr);
-    p->refcount -= 1;
-    if (p->refcount == 0) {
-        collect();
-    }
-
-    auto tp = findPtrInfo(t);
-    if (tp == refContainer.end()) {
-        auto pd = PtrDetails<T>{t, size};
-        refContainer.push_back(pd);
-    }
-
-    addr = t;
-    isArray = (size != 0);
-    arraySize = size;
-
+    Pointer<T, size> temp(t);
+    swap(*this, temp);
     return t;
 }
+
 // Overload assignment of Pointer to Pointer.
 template <class T, int size>
-Pointer<T, size> &Pointer<T, size>::operator=(Pointer &rv){
-
-    // TODO: Implement operator==
-    // LAB: Smart Pointer Project Lab
-    if (addr == rv.addr) {
-        return *this; 
-    }
-
-    typename std::list<PtrDetails<T> >::iterator p;
-    p = findPtrInfo(addr);
-    p->refcount -= 1;
-    if (p->refcount == 0) {
-        collect();
-    }
-
-    addr = rv.addr;
-    isArray = rv.isArray;
-    arraySize = rv.arraySize;
-
+Pointer<T, size> &Pointer<T, size>::operator=(Pointer o){
+    swap(*this, o);
     return *this;
 }
 

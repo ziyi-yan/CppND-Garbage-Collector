@@ -173,6 +173,7 @@ bool Pointer<T, size>::collect(){
 
 template <class T, int size>
 void Pointer<T, size>::swap(Pointer<T, size> &lhs, Pointer<T, size> &rhs) {
+    // for ADL reason, see section Notes https://en.cppreference.com/w/cpp/language/adl
     using std::swap;
     swap(lhs.addr, rhs.addr);
     swap(lhs.isArray, rhs.isArray);
@@ -180,6 +181,7 @@ void Pointer<T, size>::swap(Pointer<T, size> &lhs, Pointer<T, size> &rhs) {
 }
 
 // Overload assignment of pointer to Pointer.
+// Use copy-and-swap pattern https://www.geeksforgeeks.org/copy-swap-idiom-c/
 template <class T, int size>
 T *Pointer<T, size>::operator=(T *t){
     Pointer<T, size> temp(t);
@@ -188,6 +190,7 @@ T *Pointer<T, size>::operator=(T *t){
 }
 
 // Overload assignment of Pointer to Pointer.
+// Use copy-and-swap pattern https://www.geeksforgeeks.org/copy-swap-idiom-c/
 template <class T, int size>
 Pointer<T, size> &Pointer<T, size>::operator=(Pointer o){
     swap(*this, o);
